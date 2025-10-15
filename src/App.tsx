@@ -1,9 +1,26 @@
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import Layout from "./layouts/Layout";
+import GalleryPage from "./pages/GalleryPage";
+import NotFoundPage from "./pages/NotFoundPage";
+
+const routes = [
+	{
+		path: "/",
+		element: <Layout />,
+		errorElement: <NotFoundPage />,
+		children: [
+			{
+				index: true,
+				element: <GalleryPage />,
+			},
+		],
+	},
+];
+
+const router = createBrowserRouter(routes);
+
 function App() {
-	return (
-		<>
-			<h1 className="text-5xl text-red-500">Hello World</h1>
-		</>
-	);
+	return <RouterProvider router={router} />;
 }
 
 export default App;
