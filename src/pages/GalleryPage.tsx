@@ -1,6 +1,7 @@
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ImageUploadForm from "../components/ImageUploadForm";
 import { Plus, X } from "lucide-react";
+import type { Inputs } from "../types";
 
 const myPhotos = [
 	"https://cdn.pixabay.com/photo/2023/12/11/12/51/lynx-8443540_1280.jpg",
@@ -19,13 +20,61 @@ const myPhotos = [
 
 const GalleryPage = () => {
 	const [imageUploadFormVisible, setImageeUploadFormVisible] = useState(false);
+	const [inputs, setInputs] = useState<Inputs>({
+		title: null,
+		file: null,
+		path: null,
+	});
+	const [items, setItems] = useState(myPhotos);
+	const [count, setCount] = useState("");
+
+	useEffect(() => {
+		setCount(`${items.length} Image${items.length > 1 ? "s" : ""} Uploaded`);
+	}, [items]);
+
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		if (e.target.name == "file" && e.target.files?.[0]) {
+			setInputs({
+				...inputs,
+				file: e.target.files[0],
+				path: URL.createObjectURL(e.target.files[0]),
+			});
+		} else {
+			setInputs({
+				...inputs,
+				title: e.target.value,
+			});
+		}
+	};
+
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault();
+
+		if (inputs.path) {
+			setItems([inputs.path, ...items]);
+			setInputs({
+				title: null,
+				file: null,
+				path: null,
+			});
+
+			setImageeUploadFormVisible(false);
+		}
+	};
 
 	return (
 		<section className="flex flex-col gap-12">
 			{/* FORM TOGGLE */}
 			<div className="flex flex-col items-center gap-4">
 				<button
-					onClick={() => setImageeUploadFormVisible(!imageUploadFormVisible)}
+					onClick={() => {
+						setImageeUploadFormVisible(!imageUploadFormVisible);
+						setInputs({
+							title: null,
+							file: null,
+							path: null,
+						});
+					}}
 					className="bg-purple-500 text-zinc-900 rounded-sm px-4 py-3 cursor-pointer flex gap-2 font-bold self-end">
 					{imageUploadFormVisible ? (
 						<>
@@ -39,13 +88,19 @@ const GalleryPage = () => {
 				</button>
 
 				{/* IMAGE UPLOAD FORM */}
-				<ImageUploadForm isVisible={imageUploadFormVisible} />
+				<ImageUploadForm
+					handleChange={handleChange}
+					handleSubmit={handleSubmit}
+					inputs={inputs}
+					isVisible={imageUploadFormVisible}
+				/>
 			</div>
 
-			<p>Count</p>
+			{/* IMAGE COUNT */}
+			<p className="text-right underline underline-offset-4">{count}</p>
 
 			<div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4">
-				{myPhotos.map((photo, index) => (
+				{items.map((photo, index) => (
 					<figure
 						key={index}
 						className="size-full">
